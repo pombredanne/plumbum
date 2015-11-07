@@ -1,8 +1,15 @@
 .project
 .pydevproject
+.idea
 *.pyc
 __pycache__
 .settings/
 /dist
 /plumbum.egg-info
 /build
+*.class
+*.ropeproject
+*.swp
+*~
+*.spyder*
+/tests/.cache/*

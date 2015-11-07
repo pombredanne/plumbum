@@ -11,8 +11,9 @@
     </ul>
     <hr/>
     <a href="http://tomerfiliba.com" target="_blank">
-    <img style="display: block; margin-left: auto; margin-right: auto" 
-    src="_static/fish-text-black.png" title="Tomer's Blog"/></a>
+    <img style="display: block; margin-left: auto; margin-right: auto" alt="Tomer Filiba"
+    src="_static/fish-text-black.png" title="Tomer's Blog"/>
+    <span style="color:transparent;position: absolute;font-size:5px;width: 0px;height: 0px;">Tomer Filiba</span></a>
     <br/>
     <a href="http://github.com/tomerfiliba/plumbum" target="_blank">
     <img style="display: block; margin-left: auto; margin-right: auto; opacity: 0.7; width: 70px;" 
@@ -25,6 +26,7 @@
 
 Plumbum: Shell Combinators and More
 ===================================
+
 .. comment raw:: html
 
    <div style="width:795px; margin: 1em 0 2em 0; display: block; padding: 1em; border: 1px dotted #DDD; 
@@ -43,7 +45,7 @@ Plumbum: Shell Combinators and More
    
    </div>
 
-Ever wished the wrist-handiness of shell scripts be put into a **real** programming language? 
+Ever wished the compactness of shell scripts be put into a **real** programming language? 
 Say hello to *Plumbum Shell Combinators*. Plumbum (Latin for *lead*, which was used to create 
 pipes back in the day) is a small yet feature-rich library for shell script-like programs in Python. 
 The motto of the library is **"Never write shell scripts again"**, and thus it attempts to mimic 
@@ -53,21 +55,24 @@ and cross-platform**.
 Apart from :ref:`shell-like syntax <guide-local-commands>` and :ref:`handy shortcuts <guide-utils>`, 
 the library provides local and :ref:`remote <guide-remote-commands>` command execution (over SSH), 
 local and remote file-system :ref:`paths <guide-paths>`, easy working-directory and 
-environment :ref:`manipulation <guide-local-machine>`, and a programmatic 
+environment :ref:`manipulation <guide-local-machine>`, quick access to ANSI :ref:`colors <guide-colors>`, and a programmatic 
 :ref:`guide-cli` application toolkit. Now let's see some code!
 
 News
 ====
+
 .. include:: _news.rst
 
 * :doc:`changelog`
 
 Cheat Sheet
 ===========
+
 .. include:: _cheatsheet.rst
 
 Development and Installation
 ============================
+
 The library is developed on `github <https://github.com/tomerfiliba/plumbum>`_, and will happily 
 accept `patches <http://help.github.com/send-pull-requests/>`_ from users. Please use the github's 
 built-in `issue tracker <https://github.com/tomerfiliba/plumbum/issues>`_ to report any problem 
@@ -77,8 +82,8 @@ you encounter or to request features. The library is released under the permissi
 Requirements
 ------------
 
-Plumbum supports **Python 2.5-3.2** (requires `six <http://pypi.python.org/pypi/six>`_) and has been 
-tested on **Linux** and **Windows** machines. Any Unix-like machine should work fine out of the box,
+Plumbum supports **Python 2.6-3.5** and **PyPy** and has been 
+tested on **Linux**, **Mac**, and **Windows** machines. Any Unix-like machine should work fine out of the box,
 but on Windows, you'll probably want to install a decent `coreutils <http://en.wikipedia.org/wiki/Coreutils>`_ 
 environment and add it to your ``PATH``. I can recommend `mingw <http://mingw.org/>`_ (which comes 
 bundled with `Git for Windows <http://msysgit.github.com/>`_), but `cygwin <http://www.cygwin.com/>`_ 
@@ -105,16 +110,18 @@ you read it in order.
    :maxdepth: 2
    
    local_commands
+   paths
    local_machine
    remote
    utils
    cli
+   colors
    changelog
 
 API Reference
 =============
 The API reference (generated from the *docstrings* within the library) covers all of the 
-exposed APIs of the library. Note that some "advance" features and some function parameters are 
+exposed APIs of the library. Note that some "advanced" features and some function parameters are 
 missing from the guide, so you might want to consult with the API reference in these cases. 
 
 .. toctree::
@@ -122,11 +129,11 @@ missing from the guide, so you might want to consult with the API reference in t
    
    api/cli
    api/commands
-   api/local_machine
+   api/machines
    api/path
-   api/remote_machine
-   api/session
-   api/utils
+   api/fs
+   api/colors
+   colorlib
 
 About
 =====

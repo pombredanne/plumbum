@@ -74,6 +74,44 @@ class-level attributes, such as ``PROGNAME``, ``VERSION`` and ``DESCRIPTION``. F
         PROGNAME = "Foobar"
         VERSION = "7.3"
 
+Colors
+^^^^^^
+.. versionadded:: 1.6
+       
+Colors are supported. You can use a colored string on ``PROGNAME``, ``VERSION`` and ``DESCRIPTION`` directly.
+If you set ``PROGNAME`` to a color, you can get auto-naming and color.
+The color of the usage string is available as ``COLOR_USAGE``, and the different groups can be colored with a
+dictionary ``COLOR_GROUPS``.
+
+For instance, the following is valid::
+
+    class MyApp(cli.Application):
+        PROGNAME = colors.green
+        VERSION = colors.blue | "1.0.2"
+        COLOR_GROUPS = {"Meta-switches" : colors.bold & colors.yellow}
+        opts =  cli.Flag("--ops", help=colors.magenta | "This is help")
+
+
+
+.. raw:: html
+
+    <pre>
+    <font color="#00C000">SimpleColorCLI.py</font> <font color="#0000C0">1.0.2</font>
+    
+    Usage:
+        <font color="#00C000">SimpleColorCLI.py</font> [SWITCHES] 
+
+    <font color="#C0C000"><b>Meta-switches</b></font>
+        <font color="#C0C000"><b>-h, --help</b></font>         <font color="#C0C000"><b>Prints this help message and quits</b></font>
+        <font color="#C0C000"><b>--help-all</b></font>         <font color="#C0C000"><b>Print help messages of all subcommands and quit</b></font>
+        <font color="#C0C000"><b>-v, --version</b></font>      <font color="#C0C000"><b>Prints the program's version and quits</b></font>
+
+    Switches
+        --ops              <font color="#C000C0">This is help</font>
+    </pre>
+
+
+
 Switch Functions
 ----------------
 The decorator :func:`switch <plumbum.cli.switch>` can be seen as the "heart and soul" of the 
@@ -121,7 +159,7 @@ As demonstrated in the example above, switch functions may take no arguments (no
 specify the argument's *type*. If you require no special validation, simply pass ``str``; 
 otherwise, you may pass any type (or any callable, in fact) that will take a string and convert 
 it to a meaningful object. If conversion is not possible, the type (or callable) is expected to
-raise either ``TypeError` or ``ValueError``.
+raise either ``TypeError`` or ``ValueError``.
 
 For instance ::
 
@@ -234,7 +272,7 @@ will not be able to run the program. ::
 
 .. warning::
    The toolkit invokes the switch functions in the same order in which the switches were given
-   on the command line. It doesn't go as far as computing a topological order on the, but
+   on the command line. It doesn't go as far as computing a topological order on the fly, but
    this will change in the future.
 
 Mutual Exclusion
@@ -284,13 +322,36 @@ if the switch is given) and ``CountingAttr`` (which counts the number of occurre
         enable_logging = cli.Flag("--no-log", default = True)
         verbosity_level = cli.CountingAttr("-v")
         
-        def main(self):
+        def main(selfy):
             print self.log_file, self.enable_logging, self.verbosity_level
 
-::
+.. code-block:: bash
 
     $ ./example.py -v --log-file=log.txt -v --no-log -vvv
     log.txt False 5
+
+
+Environment Variables
+^^^^^^^^^^^^^^^^^^^^^
+.. versionadded:: 1.6
+
+You can also set a ``SwitchAttr`` to take an environment variable as an input using the envname parameter.
+For example::
+
+    class MyApp(cli.Application):
+        log_file = cli.SwitchAttr("--log-file", str, envname="MY_LOG_FILE")
+
+        def main(self):
+            print(self.log_file)
+
+.. code-block:: bash
+
+    $ MY_LOG_FILE=this.log ./example.py
+    this.log
+
+Giving the switch on the command line will override the environment variable value.
+
+    
 
 Main
 ----
@@ -339,7 +400,31 @@ With varargs::
         -h, --help                 Prints this help message and quits
         -v, --version              Prints the program's version and quits
 
+Positional argument validation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. versionadded:: 1.6
+
+You can supply positional argument validators using the ``cli.positional`` decorator. Simply
+pass the validators in the decorator matching the names in the main function. For example::
+
+    class MyApp(cli.Application):
+        @positional(cli.ExistingFile, cli.NonexistantPath)
+        def main(self, infile, *outfiles):
+            "infile is a path, outfiles are a list of paths, proper errors are given"
+
+If you only want to run your application in Python 3, you can also use annotations to
+specify the validators. For example::
+
+    class MyApp(cli.Application):
+        def main(self, infile : cli.ExistingFile, *outfiles : cli.NonexistantPath):
+        "Identical to above MyApp"
+
+Annotations are ignored if the positional decorator is present.
+    
+
+
 .. _guide-subcommands:
+
 
 Sub-commands
 ------------
@@ -374,6 +459,9 @@ application ``Geet``, which has two sub-commands - ``GeetCommit`` and ``GeetPush
 attached to the root application using the ``subcommand`` decorator ::
     
     class Geet(cli.Application):
+        """The l33t version control"""
+        VERSION = "1.7.2"
+        
         def main(self, *args):
             if args:
                 print "Unknown command %r" % (args[0],)
@@ -384,14 +472,17 @@ attached to the root application using the ``subcommand`` decorator ::
 
     @Geet.subcommand("commit")                    # attach 'geet commit'
     class GeetCommit(cli.Application):
-        auto_add = cli.Flag("-a")
-        message = cli.SwitchAttr("-m", str)
+        """creates a new commit in the current branch"""
+        
+        auto_add = cli.Flag("-a", help = "automatically add changed files")
+        message = cli.SwitchAttr("-m", str, mandatory = True, help = "sets the commit message")
 
         def main(self):
             print "doing the commit..."
 
     @Geet.subcommand("push")                      # attach 'geet push'
     class GeetPush(cli.Application):
+        """pushes the current local branch to the remote one"""
         def main(self, remote, branch = None):
             print "doing the push..."
 
@@ -399,7 +490,7 @@ attached to the root application using the ``subcommand`` decorator ::
         Geet.run()
 
 .. note::
-    * Naturally, since ``GeetCommit`` is a ``cli.Application`` on its own right, you may invoke 
+    * Since ``GeetCommit`` is a ``cli.Application`` on its own right, you may invoke 
       ``GeetCommit.run()`` directly (should that make sense in the context of your application)
     * You can also attach sub-commands "imperatively", using ``subcommand`` as a method instead
       of a decorator: ``Geet.subcommand("push", GeetPush)``
@@ -436,6 +527,27 @@ Here's an example of running this application::
     
     $ python geet.py commit -m "foo"
     committing...
+
+Terminal Utilities
+------------------
+
+Several terminal utilities are available in ``plumbum.cli.terminal`` to assist in making terminal
+applications.
+
+``get_terminal_size(default=(80,25))`` allows cross platform access to the terminal size as a tuple ``(width, height)``.
+Several methods to ask the user for input, such as ``readline``, ``ask``, ``choose``, and ``prompt`` are available.
+
+``Progress(iterator)`` allows you to quickly create a progress bar from an iterator. Simply wrap a slow iterator with this
+and iterate over it, and it will produce a nice text progress bar based on the user's screen width, with estimated time
+remaining displayed. If you need to create a progress bar for a fast iterator but with a loop containing code, use ``Progress.wrap`` or ``Progress.range``. For example::
+
+    for i in Progress.range(10):
+        time.sleep(1)
+
+If you have something that produces output, but still needs a progress bar, pass ``has_output=True`` to force the bar not to try to erase the old one each time.
+
+For the full list of helpers or more information, see the :ref:`api docs <api-cli>`.
+
 
 
 See Also

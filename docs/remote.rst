@@ -24,7 +24,9 @@ Or as a context-manager::
 .. note::
 
    ``SshMachine`` requires ``ssh`` (``openSSH`` or compatible) installed on your system in order 
-   to connect to remote machines. Alternatively, you can use the pure-Python implementation of
+   to connect to remote machines. The remote machine must have bash as the default shell (or any shell
+   that supports the ``2>&1`` syntax for stderr redirection).
+   Alternatively, you can use the pure-Python implementation of
    :ref:`ParamikoMachine <guide-paramiko-machine>`.
 
 Only the ``hostname`` parameter is required, all other parameters are optional. If the host has
@@ -161,7 +163,7 @@ overcome this, Plumbum provides integration for `paramiko <https://github.com/pa
 an open-source, pure-Python implementation of the SSH2 protocol. This is the ``ParamikoMachine``, 
 and it works along the lines of the ``SshMachine``::
 
-    >>> from plumbum.paramiko_machine import ParamikoMachine
+    >>> from plumbum.machines.paramiko_machine import ParamikoMachine
     >>> rem = ParamikoMachine("192.168.1.143")
     >>> rem["ls"]
     RemoteCommand(<ParamikoMachine paramiko://192.168.1.143>, <RemotePath /bin/ls>)
@@ -173,7 +175,7 @@ and it works along the lines of the ``SshMachine``::
 
 .. note::
     Using ``ParamikoMachine`` requires paramiko to be installed on your system. Also, you have
-    to explicitly import it (``from plumbum.paramiko_machine import ParamikoMachine``) as paramiko
+    to explicitly import it (``from plumbum.machines.paramiko_machine import ParamikoMachine``) as paramiko
     is quite heavy.
 
     Refer to :class:`the API docs <plumbum.paramiko_machine.ParamikoMachine>` for more details.
@@ -245,7 +247,7 @@ renaming paths, etc. ::
     >>> p = rem.path("/bin")
     >>> p / "ls"
     <RemotePath /bin/ls>
-    >>> (p / "ls").isfile()
+    >>> (p / "ls").is_file()
     True
     >>> rem.path("/dev") // "sd*"
     [<RemotePath /dev/sda>, < RemotePath /dev/sdb>, <RemotePath /dev/sdb1>, <RemotePath /dev/sdb2>]
@@ -253,5 +255,5 @@ renaming paths, etc. ::
 .. note::
    See the :ref:`guide-utils` guide for copying, moving and deleting remote paths
 
-
+For futher information, see the :ref:`api docs <api-remote-machines>`.
 
